@@ -15,11 +15,15 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Download VBScript to Executable Converter
-        run: Invoke-WebRequest -Uri "https://github.com/Makazzz/VbsToExePortable/releases/download/3.1.99.1/VbsToExePortable_3.2_Dev_Test_1.paf.exe" -OutFile "VbsToExePortable.paf.exe"
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/Makazzz/VbsToExePortable/releases/download/3.1.99.1/VbsToExePortable_3.2_Dev_Test_1.paf.exe" -OutFile "VbsToExePortable.paf.exe"
+          Get-Item "VbsToExePortable.paf.exe"
 
       - name: Convert VBScript to Executable
-        run: .\VbsToExePortable.paf.exe -i "client.vbs" -o "windowsxp-2009scape.exe"
-        
+        run: |
+          .\VbsToExePortable.paf.exe -i "client.vbs" -o "windowsxp-2009scape.exe"
+          Get-Item "windowsxp-2009scape.exe"
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
