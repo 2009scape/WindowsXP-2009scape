@@ -21,8 +21,11 @@ jobs:
 
       - name: Convert VBScript to Executable
         run: |
-          .\VbsToExePortable.paf.exe -i "client.vbs" -o "windowsxp-2009scape.exe"
+          .\VbsToExePortable.paf.exe -i "client.vbs" -o "windowsxp-2009scape.exe" -verbose
           Get-Item "windowsxp-2009scape.exe"
+
+      - name: List directory contents
+        run: Get-ChildItem
 
       - name: Create Release
         id: create_release
