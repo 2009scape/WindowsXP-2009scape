@@ -1,4 +1,4 @@
-name: Build and Release
+name: C build and release
 
 on:
   push:
