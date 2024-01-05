@@ -8,10 +8,12 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up MSVC
+      - name: Set up MSVC for 32-bit compilation
         uses: ilammy/msvc-dev-cmd@v1
-      - name: Compile the C code
-        run: cl.exe /Fe:program.exe main.c
+        with:
+          arch: x86  # specify 32-bit architecture
+      - name: Compile the C code for Windows XP
+        run: cl.exe /D_WIN32_WINNT=0x0501 /Fe:program.exe main.c /link /SUBSYSTEM:WINDOWS,5.01
       - name: Upload the executable as an artifact
         uses: actions/upload-artifact@v2
         with:
