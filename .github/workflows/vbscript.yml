@@ -1,0 +1,15 @@
+name: VBScript Execution
+
+on: [push, pull_request]
+
+jobs:
+  run-vbscript:
+    name: Run VBScript
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Execute VBScript
+      run: cscript.exe //Nologo client.vbs
