@@ -1,3 +1,5 @@
+Status: Not working, needs a version of rt4-client that is Java 8 compatible
+
 Ever wanted to play https://2009scape.org/ on Windows XP? Well now you can!
 
 * Supports installing Java
@@ -5,4 +7,3 @@ Ever wanted to play https://2009scape.org/ on Windows XP? Well now you can!
 
 No plugin support. Use Linux.
 
-Latest C direct download: https://github.com/dginovker/WindowsXP-2009scape/releases/latest/download/program.exe
