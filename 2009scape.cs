@@ -7,6 +7,7 @@ class Program
 {
     static void Main()
     {
+        Console.WriteLine("Start...");
         // Define the URLs and file paths
         string jarUrl = "https://gitlab.com/2009scape/rt4-client/-/jobs/5406815814/artifacts/raw/client/build/libs/rt4-client.jar";
         string jarPath = "rt4-client.jar";
@@ -27,13 +28,9 @@ class Program
 
         try
         {
-            // Download rt4-client.jar
+            // Download rt4-client.jar using WebClient
             Console.WriteLine("Downloading rt4-client.jar...");
-            using (var client = new WebClient())
-            {
-                client.DownloadFile(jarUrl, jarPath);
-            }
-            Console.WriteLine("Download complete.");
+            DownloadFileWithWebClient(jarUrl, jarPath);
 
             // Write to config.json
             Console.WriteLine("Writing to config.json...");
@@ -44,12 +41,9 @@ class Program
             Console.WriteLine("Checking for Java installation...");
             if (!IsJavaInstalled())
             {
-                // Download Java
+                // Download Java using HttpWebRequest
                 Console.WriteLine("Java not found. Downloading Java installer...");
-                using (var client = new WebClient())
-                {
-                    client.DownloadFile(javaUrl, javaInstaller);
-                }
+                DownloadFileWithHttpWebRequest(javaUrl, javaInstaller);
                 Console.WriteLine("Download complete. Installing Java...");
                 Process.Start(javaInstaller).WaitForExit();
             }
@@ -65,6 +59,28 @@ class Program
         catch (Exception ex)
         {
             Console.WriteLine("An error occurred: " + ex.Message);
+            Console.ReadLine();
+        }
+    }
+
+    static void DownloadFileWithWebClient(string fileUrl, string filePath)
+    {
+        using (var client = new WebClient())
+        {
+            client.DownloadFile(fileUrl, filePath);
+        }
+    }
+
+    static void DownloadFileWithHttpWebRequest(string fileUrl, string filePath)
+    {
+        HttpWebRequest request = (HttpWebRequest)WebRequest.Create(fileUrl);
+        request.Method = "GET";
+
+        using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+        using (Stream responseStream = response.GetResponseStream())
+        using (FileStream fileStream = File.Create(filePath))
+        {
+            responseStream.CopyTo(fileStream);
         }
     }
 
