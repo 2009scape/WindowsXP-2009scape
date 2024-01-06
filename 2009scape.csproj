@@ -1,0 +1,4 @@
+<ItemGroup>
+  <EmbeddedResource Include="rt4-client.jar" />
+  <EmbeddedResource Include="java_installer.msi" />
+</ItemGroup>

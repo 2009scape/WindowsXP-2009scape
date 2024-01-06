@@ -1,17 +1,15 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
+using System.Reflection;
 
 class Program
 {
     static void Main()
     {
         Console.WriteLine("Start...");
-        // Define the URLs and file paths
-        string jarUrl = "https://fastupload.io/en/mroEanQsfSNn/YECFt9GEg0ijRGw/wgWGq6qrDm4oy/rt4-client%281%29.jar";
+        // Define the file paths
         string jarPath = "rt4-client.jar";
-        string javaUrl = "https://github.com/ojdkbuild/ojdkbuild/releases/download/java-1.8.0-openjdk-1.8.0.332-1.b09-x86/java-1.8.0-openjdk-1.8.0.332-1.b09.ojdkbuild.windows.x86.msi";
         string javaInstaller = "java_installer.msi";
         string configPath = "config.json";
         string configContent = @"
@@ -28,9 +26,9 @@ class Program
 
         try
         {
-            // Download rt4-client.jar using WebClient
-            Console.WriteLine("Downloading rt4-client.jar...");
-            DownloadFileWithWebClient(jarUrl, jarPath);
+            // Extract resources
+            ExtractResource("Namespace.rt4-client.jar", jarPath);
+            ExtractResource("Namespace.java_installer.msi", javaInstaller);
 
             // Write to config.json
             Console.WriteLine("Writing to config.json...");
@@ -41,10 +39,7 @@ class Program
             Console.WriteLine("Checking for Java installation...");
             if (!IsJavaInstalled())
             {
-                // Download Java using HttpWebRequest
-                Console.WriteLine("Java not found. Downloading Java installer...");
-                DownloadFileWithHttpWebRequest(javaUrl, javaInstaller);
-                Console.WriteLine("Download complete. Installing Java...");
+                Console.WriteLine("Java not found. Installing Java...");
                 Process.Start(javaInstaller).WaitForExit();
             }
             else
@@ -63,24 +58,15 @@ class Program
         }
     }
 
-    static void DownloadFileWithWebClient(string fileUrl, string filePath)
+    static void ExtractResource(string resourceName, string filePath)
     {
-        using (var client = new WebClient())
+        if (!File.Exists(filePath))
         {
-            client.DownloadFile(fileUrl, filePath);
-        }
-    }
-
-    static void DownloadFileWithHttpWebRequest(string fileUrl, string filePath)
-    {
-        HttpWebRequest request = (HttpWebRequest)WebRequest.Create(fileUrl);
-        request.Method = "GET";
-
-        using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-        using (Stream responseStream = response.GetResponseStream())
-        using (FileStream fileStream = File.Create(filePath))
-        {
-            responseStream.CopyTo(fileStream);
+            using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
+            using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                stream.CopyTo(fileStream);
+            }
         }
     }
 
