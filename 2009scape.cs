@@ -3,13 +3,18 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 
-class RT4ClientHandler
+class Program
 {
     static void Main()
     {
+        // Define the URLs and file paths
         string jarUrl = "https://gitlab.com/2009scape/rt4-client/-/jobs/5406815814/artifacts/raw/client/build/libs/rt4-client.jar";
         string jarPath = "rt4-client.jar";
-        string configContent = @"{
+        string javaUrl = "https://github.com/ojdkbuild/ojdkbuild/releases/download/java-1.8.0-openjdk-1.8.0.332-1.b09-x86/java-1.8.0-openjdk-1.8.0.332-1.b09.ojdkbuild.windows.x86.msi";
+        string javaInstaller = "java_installer.msi";
+        string configPath = "config.json";
+        string configContent = @"
+{
   ""ip_management"": ""play.2009scape.org"",
   ""ip_address"": ""play.2009scape.org"",
   ""world"": 1,
@@ -19,40 +24,34 @@ class RT4ClientHandler
   ""ui_scale"": 1,
   ""fps"": 0
 }";
-        string configPath = "config.json";
-        string javaDownloadUrl = "https://github.com/ojdkbuild/ojdkbuild/releases/download/java-1.8.0-openjdk-1.8.0.332-1.b09-x86/java-1.8.0-openjdk-1.8.0.332-1.b09.ojdkbuild.windows.x86.msi";
-        string javaInstallPath = "java_installer.msi";
 
         try
         {
-            Console.WriteLine("Starting the RT4 Client Handler.");
-
             // Download rt4-client.jar
-            Console.WriteLine($"Downloading rt4-client.jar from {jarUrl}");
-            using (WebClient client = new WebClient())
+            Console.WriteLine("Downloading rt4-client.jar...");
+            using (var client = new WebClient())
             {
                 client.DownloadFile(jarUrl, jarPath);
             }
-            Console.WriteLine("rt4-client.jar downloaded successfully.");
+            Console.WriteLine("Download complete.");
 
-            // Write config.json
-            Console.WriteLine("Writing config.json file.");
+            // Write to config.json
+            Console.WriteLine("Writing to config.json...");
             File.WriteAllText(configPath, configContent);
-            Console.WriteLine("config.json written successfully.");
+            Console.WriteLine("Write complete.");
 
-            // Check for Java installation
-            Console.WriteLine("Checking for Java installation.");
+            // Check if Java is installed
+            Console.WriteLine("Checking for Java installation...");
             if (!IsJavaInstalled())
             {
-                Console.WriteLine("Java is not installed. Downloading installer.");
-                using (WebClient client = new WebClient())
+                // Download Java
+                Console.WriteLine("Java not found. Downloading Java installer...");
+                using (var client = new WebClient())
                 {
-                    client.DownloadFile(javaDownloadUrl, javaInstallPath);
+                    client.DownloadFile(javaUrl, javaInstaller);
                 }
-                Console.WriteLine("Java installer downloaded. Installing Java.");
-                Process javaInstallProcess = Process.Start(javaInstallPath);
-                javaInstallProcess.WaitForExit();
-                Console.WriteLine("Java installed successfully.");
+                Console.WriteLine("Download complete. Installing Java...");
+                Process.Start(javaInstaller).WaitForExit();
             }
             else
             {
@@ -60,16 +59,12 @@ class RT4ClientHandler
             }
 
             // Run rt4-client.jar with Java
-            Console.WriteLine("Running rt4-client.jar with Java.");
-            Process javaProcess = Process.Start("java", "-jar " + jarPath);
-            javaProcess.WaitForExit();
-            Console.WriteLine("rt4-client.jar execution finished.");
-
-            Console.WriteLine("RT4 Client Handler completed successfully.");
+            Console.WriteLine("Running rt4-client.jar with Java...");
+            Process.Start("java", "-jar " + jarPath).WaitForExit();
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Console.WriteLine("An error occurred: " + e.Message);
+            Console.WriteLine("An error occurred: " + ex.Message);
         }
     }
 
@@ -77,15 +72,22 @@ class RT4ClientHandler
     {
         try
         {
-            Process process = new Process();
-            process.StartInfo.FileName = "java";
-            process.StartInfo.Arguments = "-version";
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardError = true;
-            process.Start();
-            string output = process.StandardError.ReadToEnd();
-            process.WaitForExit();
-            return output.Contains("version");
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = "java",
+                Arguments = "-version",
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            using (Process pr = Process.Start(psi))
+            {
+                using (StreamReader reader = pr.StandardError)
+                {
+                    string output = reader.ReadToEnd();
+                    return output.Contains("version");
+                }
+            }
         }
         catch
         {
