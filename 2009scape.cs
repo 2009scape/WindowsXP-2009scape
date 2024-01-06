@@ -3,20 +3,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 
-class Program
+class RT4ClientHandler
 {
     static void Main()
     {
         string jarUrl = "https://gitlab.com/2009scape/rt4-client/-/jobs/5406815814/artifacts/raw/client/build/libs/rt4-client.jar";
         string jarPath = "rt4-client.jar";
-        string javaInstallerUrl = "https://github.com/ojdkbuild/ojdkbuild/releases/download/java-1.8.0-openjdk-1.8.0.332-1.b09-x86/java-1.8.0-openjdk-1.8.0.332-1.b09.ojdkbuild.windows.x86.msi";
-        string javaInstallerPath = "java_installer.msi";
-
-        // Download rt4-client.jar
-        DownloadFile(jarUrl, jarPath);
-
-        // Write content to config.json
-        string jsonContent = @"{
+        string configContent = @"{
   ""ip_management"": ""play.2009scape.org"",
   ""ip_address"": ""play.2009scape.org"",
   ""world"": 1,
@@ -26,28 +19,57 @@ class Program
   ""ui_scale"": 1,
   ""fps"": 0
 }";
-        File.WriteAllText("config.json", jsonContent);
+        string configPath = "config.json";
+        string javaDownloadUrl = "https://github.com/ojdkbuild/ojdkbuild/releases/download/java-1.8.0-openjdk-1.8.0.332-1.b09-x86/java-1.8.0-openjdk-1.8.0.332-1.b09.ojdkbuild.windows.x86.msi";
+        string javaInstallPath = "java_installer.msi";
 
-        // Check if Java is installed
-        if (!IsJavaInstalled())
+        try
         {
-            // Download Java installer
-            DownloadFile(javaInstallerUrl, javaInstallerPath);
+            Console.WriteLine("Starting the RT4 Client Handler.");
 
-            // Run Java installer
-            Process javaInstallProcess = Process.Start(javaInstallerPath);
-            javaInstallProcess.WaitForExit();
+            // Download rt4-client.jar
+            Console.WriteLine($"Downloading rt4-client.jar from {jarUrl}");
+            using (WebClient client = new WebClient())
+            {
+                client.DownloadFile(jarUrl, jarPath);
+            }
+            Console.WriteLine("rt4-client.jar downloaded successfully.");
+
+            // Write config.json
+            Console.WriteLine("Writing config.json file.");
+            File.WriteAllText(configPath, configContent);
+            Console.WriteLine("config.json written successfully.");
+
+            // Check for Java installation
+            Console.WriteLine("Checking for Java installation.");
+            if (!IsJavaInstalled())
+            {
+                Console.WriteLine("Java is not installed. Downloading installer.");
+                using (WebClient client = new WebClient())
+                {
+                    client.DownloadFile(javaDownloadUrl, javaInstallPath);
+                }
+                Console.WriteLine("Java installer downloaded. Installing Java.");
+                Process javaInstallProcess = Process.Start(javaInstallPath);
+                javaInstallProcess.WaitForExit();
+                Console.WriteLine("Java installed successfully.");
+            }
+            else
+            {
+                Console.WriteLine("Java is already installed.");
+            }
+
+            // Run rt4-client.jar with Java
+            Console.WriteLine("Running rt4-client.jar with Java.");
+            Process javaProcess = Process.Start("java", "-jar " + jarPath);
+            javaProcess.WaitForExit();
+            Console.WriteLine("rt4-client.jar execution finished.");
+
+            Console.WriteLine("RT4 Client Handler completed successfully.");
         }
-
-        // Run rt4-client.jar with Java
-        Process.Start("java", "-jar " + jarPath);
-    }
-
-    static void DownloadFile(string url, string outputPath)
-    {
-        using (WebClient client = new WebClient())
+        catch (Exception e)
         {
-            client.DownloadFile(url, outputPath);
+            Console.WriteLine("An error occurred: " + e.Message);
         }
     }
 
@@ -55,17 +77,14 @@ class Program
     {
         try
         {
-            ProcessStartInfo psi = new ProcessStartInfo
-            {
-                FileName = "java",
-                Arguments = "-version",
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-            Process proc = Process.Start(psi);
-            string output = proc.StandardError.ReadToEnd();
-            proc.WaitForExit();
+            Process process = new Process();
+            process.StartInfo.FileName = "java";
+            process.StartInfo.Arguments = "-version";
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardError = true;
+            process.Start();
+            string output = process.StandardError.ReadToEnd();
+            process.WaitForExit();
             return output.Contains("version");
         }
         catch
