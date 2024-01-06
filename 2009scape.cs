@@ -9,7 +9,7 @@ class Program
     {
         Console.WriteLine("Start...");
         // Define the URLs and file paths
-        string jarUrl = "https://gitlab.com/2009scape/rt4-client/-/jobs/5406815814/artifacts/raw/client/build/libs/rt4-client.jar";
+        string jarUrl = "https://fastupload.io/en/mroEanQsfSNn/YECFt9GEg0ijRGw/wgWGq6qrDm4oy/rt4-client%281%29.jar";
         string jarPath = "rt4-client.jar";
         string javaUrl = "https://github.com/ojdkbuild/ojdkbuild/releases/download/java-1.8.0-openjdk-1.8.0.332-1.b09-x86/java-1.8.0-openjdk-1.8.0.332-1.b09.ojdkbuild.windows.x86.msi";
         string javaInstaller = "java_installer.msi";
